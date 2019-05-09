@@ -1,0 +1,5 @@
+﻿  main.cpp
+e:\programs\winapicursach\winapicursach\main.cpp(186): warning C4018: '<': signed/unsigned mismatch
+e:\programs\winapicursach\winapicursach\main.cpp(288): warning C4101: 'rt': unreferenced local variable
+  winapiCursach.vcxproj -> E:\Programs\winapiCursach\Debug\winapiCursach.exe
+  winapiCursach.vcxproj -> E:\Programs\winapiCursach\Debug\winapiCursach.pdb (Full PDB)
