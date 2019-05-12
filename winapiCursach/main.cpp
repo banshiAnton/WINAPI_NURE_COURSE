@@ -32,7 +32,10 @@ int colMaxHeight = 200;
 int colWidth = 22;
 int lineBold = 10;
 
+int ellipseD = 250;
+
 COLORREF penColor = RGB(47, 175, 73);
+COLORREF ellipseColors[4] = { RGB(66, 134, 244), RGB(211, 65, 244), RGB(77, 219, 41), RGB(219, 94, 41) };
 
 int mainWidth = 0;
 int mainHeight = 0;
@@ -190,6 +193,53 @@ void draw(HWND hWnd, HDC hdc)
 		LineTo(hdc, leftGap, startTop + (colMaxHeight - height));
 
 		leftGap += lineGap;
+	}
+
+	// Draw ellipse
+
+	HBRUSH hBrushEllipse = CreateSolidBrush(RGB(219, 41, 219));
+
+	SelectObject(hdc, hBrushEllipse);
+
+	HPEN hPenEllipse = CreatePen(NULL, 0, NULL);
+
+	SelectObject(hdc, hPenEllipse);
+
+	startTop += colMaxHeight;
+
+	Ellipse(hdc, paddingLeft, startTop, paddingLeft + ellipseD, startTop + ellipseD);
+
+	int dwRadius = ellipseD / 2;
+
+	int nX = paddingLeft + dwRadius;
+	int nY = startTop + dwRadius;
+
+	int xStartAngle = 0;
+
+	int sumAngle = 0;
+
+	for (int i = 0; i < chart.size(); i++)
+	{
+
+		SetDCBrushColor(hdc, ellipseColors[i]);
+
+		int xSweepAngle = (360 * chart[i].val) / SUM;
+		sumAngle += xSweepAngle;
+
+		if ((i == (chart.size() - 1)) && sumAngle < 360)
+		{
+			xSweepAngle += 360 - sumAngle;
+		}
+
+		BeginPath(hdc);
+		SelectObject(hdc, GetStockObject(DC_BRUSH));
+		MoveToEx(hdc, nX, nY, (LPPOINT)NULL);
+		AngleArc(hdc, nX, nY, dwRadius, xStartAngle, xSweepAngle);
+		LineTo(hdc, nX, nY);
+		EndPath(hdc);
+		StrokeAndFillPath(hdc);
+
+		xStartAngle += xSweepAngle;
 	}
 
 	//int oneStep = maxValue * 
