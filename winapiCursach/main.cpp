@@ -1,5 +1,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+#define ID_PICK_FILE_BUTTON 1337
+#define ID_EDIT_BOX 1338
+
+#define ID_BUTTON_COLOR 1339
+#define ID_COMBOX 1340
+
+
 #include <windows.h> // підключення бібліотеки з функціями API
 #include <string>
 #include <stdio.h>
@@ -8,12 +15,11 @@
 
 // Глобальні змінні:
 HINSTANCE hInst; 	//Дескриптор програми
-//HWND hEdit;
+HWND hComBox;
 LPCTSTR szWindowClass = "CHART";
 LPCTSTR szTitle = "CHART";
 
-#define ID_PICK_FILE_BUTTON 1337
-#define ID_EDIT_BOX 1338
+int currentSec = 0;
 
 bool isSetUp = false;
 
@@ -122,6 +128,7 @@ void readFile(char* filePath, HWND hWnd)
 		file.close();
 
 		isSetUp = true;
+		SendMessage(hComBox, (UINT)CB_SETCURSEL, currentSec, 0);
 		InvalidateRect(hWnd, NULL, TRUE);
 	}
 }
@@ -136,6 +143,8 @@ void setUp(std::string line)
 
 	item.name = line.substr(0, pos);
 	item.val = std::stoi( line.substr( pos + 1, line.size() ) );
+
+	SendMessage(hComBox, CB_ADDSTRING, 0, (LPARAM)item.name.c_str());
 
 	if (item.val > maxValue) maxValue = item.val;
 	if (item.val < minValue) minValue = item.val;
@@ -225,7 +234,7 @@ void draw(HWND hWnd, HDC hdc)
 
 	leftGap = paddingLeft * 2;
 
-	HPEN hPen = CreatePen(NULL, lineBold, penColor);
+	HPEN hPen = CreatePen(NULL, lineBold, chart[0].color);
 
 	SelectObject(hdc, hPen);
 
@@ -238,6 +247,10 @@ void draw(HWND hWnd, HDC hdc)
 
 	for(int i = 1; i < chart.size(); i++)
 	{
+		hPen = CreatePen(NULL, lineBold, chart[i].color);
+
+		SelectObject(hdc, hPen);
+
 		int height = (chart[i].val * colMaxHeight) / maxValue;
 
 		LineTo(hdc, leftGap, startTop + (colMaxHeight - height));
@@ -310,7 +323,7 @@ void draw(HWND hWnd, HDC hdc)
 	for (int i = 0; i < chart.size(); i++)
 	{
 
-		SetDCBrushColor(hdc, ellipseColors[i]);
+		SetDCBrushColor(hdc, chart[i].color);
 
 		int xSweepAngle = (360 * chart[i].val) / SUM;
 		sumAngle += xSweepAngle;
@@ -409,6 +422,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	setMainSize(hWnd);
 
 	CreateWindow("button", "Pick File", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, 10, buttonWidth, buttonHeight, hWnd, (HMENU)ID_PICK_FILE_BUTTON, NULL, NULL);
+	hComBox = CreateWindow("combobox", "PickColor", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE, mainWidth - 350, mainHeight - 200, buttonWidth + 70, buttonHeight + 200, hWnd, (HMENU)ID_COMBOX, NULL, NULL);
+	CreateWindow("button", "PickColorButton", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, mainWidth - 150, mainHeight - 50, buttonWidth + 70, buttonHeight + 20, hWnd, (HMENU)ID_BUTTON_COLOR, NULL, NULL);
+	
 	//hEdit = CreateWindow("edit", "", WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_BORDER | ES_AUTOHSCROLL, 10, 50, 400, 300, hWnd, (HMENU)ID_EDIT_BOX, NULL, NULL);
 
 	ShowWindow(hWnd, nCmdShow); 		//Показати вікно
@@ -419,6 +435,23 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 // FUNCTION: WndProc (HWND, unsigned, WORD, LONG)
 // Віконна процедура. Приймає і обробляє всі повідомлення, що приходять в додаток
 
+void pickColor(HWND hWnd)
+{
+	static DWORD rgbCurrent;
+	COLORREF acrCustClr[16];
+
+	CHOOSECOLOR cc;
+	ZeroMemory(&cc, sizeof(CHOOSECOLOR));
+	cc.lStructSize = sizeof(CHOOSECOLOR);
+	cc.hwndOwner = hWnd;
+	cc.lpCustColors = (LPDWORD)acrCustClr;
+	cc.rgbResult = rgbCurrent;
+
+	if (ChooseColor(&cc))
+	{
+		chart[currentSec].color = cc.rgbResult;
+	}
+}
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -442,6 +475,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case ID_PICK_FILE_BUTTON:
 			//MessageBox(hWnd, "Pick File", "File", MB_OK);
 			pickFile(hWnd);
+			break;
+		case ID_BUTTON_COLOR:
+
+			currentSec = SendMessage(hComBox, (UINT)CB_GETCURSEL, 0, 0);
+
+			pickColor(hWnd);
+
+			InvalidateRect(hWnd, NULL, TRUE);
+
 			break;
 		default:
 			break;
