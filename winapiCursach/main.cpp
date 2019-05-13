@@ -40,7 +40,7 @@ COLORREF ellipseColors[4] = { RGB(66, 134, 244), RGB(211, 65, 244), RGB(77, 219,
 int mainWidth = 0;
 int mainHeight = 0;
 
-const int COUNTSECTIONS = 8;
+int COUNTSECTIONS = 8;
 
 struct chartItem
 {
@@ -152,13 +152,15 @@ void setUp(std::string line)
 
 void draw(HWND hWnd, HDC hdc)
 {
+	/******************** Draw first chart ******************/
+
 	if (!isSetUp) return;
 
 	int leftGap = paddingLeft * 2;
 	int maxLengthChart = mainWidth - leftGap - paddingLeft;
 	int gap = paddingLeft * 2;
 
-	int startTop = paddingTop * 3 + buttonHeight;
+	int startTop = paddingTop * 2 + buttonHeight;
 	int startTopGrid = startTop - 10;
 
 	for (chartItem item : chart)
@@ -174,7 +176,12 @@ void draw(HWND hWnd, HDC hdc)
 		startTop += gap + colWidth;
 	}
 
-	//Draw grid
+	/***********************************************************/
+
+
+
+
+	/********* Draw grid for first chart ******************/
 
 	HPEN hPenGrid = CreatePen(NULL, 1, RGB(0,0,0));
 
@@ -196,14 +203,25 @@ void draw(HWND hWnd, HDC hdc)
 		leftGap += gridGap;
 	}
 
-	//Draw bottom line
+	/***********************************************************/
+
+
+
+
+
+	/*********Draw bottom line for grid for first chart ******************/
 
 	MoveToEx(hdc, paddingLeft * 2, startTop, NULL);
 	LineTo(hdc, paddingLeft * 2 + maxLengthChart, startTop);
 
-	//Draw line
+	/***********************************************************/
 
-	startTop += 30;
+
+
+
+	/********* Draw second chart(line) ******************/
+
+	startTop += 45;
 
 	leftGap = paddingLeft * 2;
 
@@ -227,7 +245,46 @@ void draw(HWND hWnd, HDC hdc)
 		leftGap += lineGap;
 	}
 
-	// Draw ellipse
+	/***********************************************************/
+
+
+
+
+
+	/********* Draw grid for secod chart(line) ******************/
+
+	int startLinesGrid = startTop;
+
+	COUNTSECTIONS -= COUNTSECTIONS / 2;
+
+	SelectObject(hdc, hPenGrid); 
+
+	int valLineSte = (maxValue - minValue) / COUNTSECTIONS;
+	int labeLineValue = maxValue;
+
+	int topStep = ( ( ( (maxValue - minValue) * colMaxHeight) / maxValue) / COUNTSECTIONS);
+
+	leftGap = paddingLeft * 2;
+
+	for (int i = 0; i <= COUNTSECTIONS; i++)
+	{
+		MoveToEx(hdc, leftGap, startLinesGrid, NULL);
+		LineTo(hdc, leftGap + maxLengthChart, startLinesGrid);
+
+		char label[5];
+		TextOut(hdc, leftGap - 6, startLinesGrid + 5, label, wsprintf(label, "%d", labeLineValue));
+
+		startLinesGrid += topStep;
+		labeLineValue -= valLineSte;
+	}
+
+	/***********************************************************/
+
+
+
+
+
+	/********* Draw third chart(ellipse) ******************/
 
 	HBRUSH hBrushEllipse = CreateSolidBrush(RGB(219, 41, 219));
 
@@ -237,7 +294,7 @@ void draw(HWND hWnd, HDC hdc)
 
 	SelectObject(hdc, hPenEllipse);
 
-	startTop += colMaxHeight;
+	startTop += colMaxHeight - 20;
 
 	Ellipse(hdc, paddingLeft, startTop, paddingLeft + ellipseD, startTop + ellipseD);
 
@@ -274,7 +331,7 @@ void draw(HWND hWnd, HDC hdc)
 		xStartAngle += xSweepAngle;
 	}
 
-	//int oneStep = maxValue * 
+	/***********************************************************/
 
 }
 
