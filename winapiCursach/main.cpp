@@ -40,6 +40,8 @@ COLORREF ellipseColors[4] = { RGB(66, 134, 244), RGB(211, 65, 244), RGB(77, 219,
 int mainWidth = 0;
 int mainHeight = 0;
 
+const int COUNTSECTIONS = 8;
+
 struct chartItem
 {
 	std::string name;
@@ -157,6 +159,7 @@ void draw(HWND hWnd, HDC hdc)
 	int gap = paddingLeft * 2;
 
 	int startTop = paddingTop * 3 + buttonHeight;
+	int startTopGrid = startTop - 10;
 
 	for (chartItem item : chart)
 	{
@@ -171,7 +174,36 @@ void draw(HWND hWnd, HDC hdc)
 		startTop += gap + colWidth;
 	}
 
-	startTop += 25;
+	//Draw grid
+
+	HPEN hPenGrid = CreatePen(NULL, 1, RGB(0,0,0));
+
+	SelectObject(hdc, hPenGrid);
+
+	int gridGap = maxLengthChart / COUNTSECTIONS;
+	int valStep = maxValue / COUNTSECTIONS;
+	int labelValue = 0;
+
+	for (int i = 0; i <= COUNTSECTIONS; i++)
+	{
+		MoveToEx(hdc, leftGap, startTopGrid, NULL);
+		LineTo(hdc, leftGap, startTop);
+
+		char label[5];
+		TextOut(hdc, leftGap - 6, startTop + 10, label, wsprintf(label, "%d", labelValue));
+
+		labelValue += valStep;
+		leftGap += gridGap;
+	}
+
+	//Draw bottom line
+
+	MoveToEx(hdc, paddingLeft * 2, startTop, NULL);
+	LineTo(hdc, paddingLeft * 2 + maxLengthChart, startTop);
+
+	//Draw line
+
+	startTop += 30;
 
 	leftGap = paddingLeft * 2;
 
