@@ -15,7 +15,7 @@
 
 // Глобальні змінні:
 HINSTANCE hInst; 	//Дескриптор програми
-HWND hComBox;
+HWND selectChart, pickFileButton, chooseColorButton;
 LPCTSTR szWindowClass = "CHART";
 LPCTSTR szTitle = "CHART";
 
@@ -128,9 +128,29 @@ void readFile(char* filePath, HWND hWnd)
 		file.close();
 
 		isSetUp = true;
-		SendMessage(hComBox, (UINT)CB_SETCURSEL, currentSec, 0);
+		SendMessage(selectChart, (UINT)CB_SETCURSEL, currentSec, 0);
 		InvalidateRect(hWnd, NULL, TRUE);
 	}
+}
+
+void setUpUI(HWND hWnd)
+{
+	if (!isSetUp) return;
+
+	DestroyWindow(chooseColorButton);
+	DestroyWindow(selectChart);
+
+	selectChart = CreateWindow("combobox", "PickColor", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE, mainWidth - 150, mainHeight - 230, buttonWidth + 70, buttonHeight + 200, hWnd, (HMENU)ID_COMBOX, NULL, NULL);
+	chooseColorButton = CreateWindow("button", "PickColorButton", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, mainWidth - 150, mainHeight - 50, buttonWidth + 70, buttonHeight + 20, hWnd, (HMENU)ID_BUTTON_COLOR, NULL, NULL);
+
+	currentSec = 0;
+
+	for (chartItem item : chart)
+	{
+		SendMessage(selectChart, CB_ADDSTRING, 0, (LPARAM)item.name.c_str());
+	}
+
+	SendMessage(selectChart, (UINT)CB_SETCURSEL, currentSec, 0);
 }
 
 void setUp(std::string line)
@@ -144,7 +164,7 @@ void setUp(std::string line)
 	item.name = line.substr(0, pos);
 	item.val = std::stoi( line.substr( pos + 1, line.size() ) );
 
-	SendMessage(hComBox, CB_ADDSTRING, 0, (LPARAM)item.name.c_str());
+	SendMessage(selectChart, CB_ADDSTRING, 0, (LPARAM)item.name.c_str());
 
 	if (item.val > maxValue) maxValue = item.val;
 	if (item.val < minValue) minValue = item.val;
@@ -196,6 +216,7 @@ void draw(HWND hWnd, HDC hdc)
 
 	SelectObject(hdc, hPenGrid);
 
+
 	int gridGap = maxLengthChart / COUNTSECTIONS;
 	int valStep = maxValue / COUNTSECTIONS;
 	int labelValue = 0;
@@ -207,6 +228,9 @@ void draw(HWND hWnd, HDC hdc)
 
 		char label[5];
 		TextOut(hdc, leftGap - 6, startTop + 10, label, wsprintf(label, "%d", labelValue));
+
+		OutputDebugString((LPCSTR)label);
+		OutputDebugString((LPCSTR)"\n");
 
 		labelValue += valStep;
 		leftGap += gridGap;
@@ -268,18 +292,20 @@ void draw(HWND hWnd, HDC hdc)
 
 	int startLinesGrid = startTop;
 
-	COUNTSECTIONS -= COUNTSECTIONS / 2;
+	int COUNTSECTIONS_FOR_SECORD_GRID = COUNTSECTIONS;
+
+	COUNTSECTIONS_FOR_SECORD_GRID -= COUNTSECTIONS / 2;
 
 	SelectObject(hdc, hPenGrid); 
 
-	int valLineSte = (maxValue - minValue) / COUNTSECTIONS;
+	int valLineSte = (maxValue - minValue) / COUNTSECTIONS_FOR_SECORD_GRID;
 	int labeLineValue = maxValue;
 
-	int topStep = ( ( ( (maxValue - minValue) * colMaxHeight) / maxValue) / COUNTSECTIONS);
+	int topStep = ( ( ( (maxValue - minValue) * colMaxHeight) / maxValue) / COUNTSECTIONS_FOR_SECORD_GRID);
 
 	leftGap = paddingLeft * 2;
 
-	for (int i = 0; i <= COUNTSECTIONS; i++)
+	for (int i = 0; i <= COUNTSECTIONS_FOR_SECORD_GRID; i++)
 	{
 		MoveToEx(hdc, leftGap, startLinesGrid, NULL);
 		LineTo(hdc, leftGap + maxLengthChart, startLinesGrid);
@@ -421,9 +447,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	setMainSize(hWnd);
 
-	CreateWindow("button", "Pick File", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, 10, buttonWidth, buttonHeight, hWnd, (HMENU)ID_PICK_FILE_BUTTON, NULL, NULL);
-	hComBox = CreateWindow("combobox", "PickColor", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE, mainWidth - 350, mainHeight - 200, buttonWidth + 70, buttonHeight + 200, hWnd, (HMENU)ID_COMBOX, NULL, NULL);
-	CreateWindow("button", "PickColorButton", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, mainWidth - 150, mainHeight - 50, buttonWidth + 70, buttonHeight + 20, hWnd, (HMENU)ID_BUTTON_COLOR, NULL, NULL);
+	pickFileButton = CreateWindow("button", "Pick File", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, 10, buttonWidth, buttonHeight, hWnd, (HMENU)ID_PICK_FILE_BUTTON, NULL, NULL);
+	selectChart = CreateWindow("combobox", "PickColor", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE, mainWidth - 150, mainHeight - 230, buttonWidth + 70, buttonHeight + 200, hWnd, (HMENU)ID_COMBOX, NULL, NULL);
+	chooseColorButton = CreateWindow("button", "PickColorButton", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, mainWidth - 150, mainHeight - 50, buttonWidth + 70, buttonHeight + 20, hWnd, (HMENU)ID_BUTTON_COLOR, NULL, NULL);
 	
 	//hEdit = CreateWindow("edit", "", WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_BORDER | ES_AUTOHSCROLL, 10, 50, 400, 300, hWnd, (HMENU)ID_EDIT_BOX, NULL, NULL);
 
@@ -469,6 +495,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		draw(hWnd, hdc);
 		EndPaint(hWnd, &ps); 		//Закінчити графічний вивід	
 		break;
+	case WM_SIZE:
+		setMainSize(hWnd);
+		setUpUI(hWnd);
+		InvalidateRect(hWnd, NULL, TRUE);
+		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -478,11 +509,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case ID_BUTTON_COLOR:
 
-			currentSec = SendMessage(hComBox, (UINT)CB_GETCURSEL, 0, 0);
+			currentSec = SendMessage(selectChart, (UINT)CB_GETCURSEL, 0, 0);
 
 			pickColor(hWnd);
 
-			InvalidateRect(hWnd, NULL, TRUE);
+			InvalidateRect(hWnd, NULL, FALSE);
 
 			break;
 		default:
