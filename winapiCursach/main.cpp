@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <vector>
+#include <ctime>
 
 // Глобальні змінні:
 HINSTANCE hInst; 	//Дескриптор програми
@@ -62,6 +63,16 @@ void pickFile(HWND);
 void readFile(char*, HWND);
 void setUp(std::string line);
 void draw(HWND, HDC);
+
+COLORREF getRandColor()
+{
+	const int maxChanelVal = 256;
+	int r = rand() % maxChanelVal;
+	int g = rand() % maxChanelVal;
+	int b = rand() % maxChanelVal;
+
+	return RGB(r, g, b);
+}
 
 RECT setMainSize(HWND hWnd, bool set = true)
 {
@@ -170,7 +181,7 @@ void setUp(std::string line)
 	if (item.val < minValue) minValue = item.val;
 	SUM += item.val;
 
-	item.color = RGB(196, 43, 147);
+	item.color = getRandColor();
 
 	chart.push_back( item );
 
@@ -383,6 +394,8 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	int nCmdShow)
 {
+	srand(time(NULL));
+
 	MSG msg;
 
 	// Реєстрація класу вікна 
