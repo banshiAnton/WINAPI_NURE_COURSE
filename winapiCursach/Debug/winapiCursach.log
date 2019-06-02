@@ -1,8 +1,8 @@
 ﻿  main.cpp
-e:\programs\winapicursach\winapicursach\main.cpp(283): warning C4018: '<': signed/unsigned mismatch
-e:\programs\winapicursach\winapicursach\main.cpp(360): warning C4018: '<': signed/unsigned mismatch
-e:\programs\winapicursach\winapicursach\main.cpp(376): warning C4244: 'argument': conversion from 'int' to 'FLOAT', possible loss of data
-e:\programs\winapicursach\winapicursach\main.cpp(397): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-e:\programs\winapicursach\winapicursach\main.cpp(499): warning C4101: 'rt': unreferenced local variable
+e:\programs\winapicursach\winapicursach\main.cpp(312): warning C4018: '<': signed/unsigned mismatch
+e:\programs\winapicursach\winapicursach\main.cpp(389): warning C4018: '<': signed/unsigned mismatch
+e:\programs\winapicursach\winapicursach\main.cpp(405): warning C4244: 'argument': conversion from 'int' to 'FLOAT', possible loss of data
+e:\programs\winapicursach\winapicursach\main.cpp(426): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+e:\programs\winapicursach\winapicursach\main.cpp(529): warning C4101: 'rt': unreferenced local variable
   winapiCursach.vcxproj -> E:\Programs\winapiCursach\Debug\winapiCursach.exe
   winapiCursach.vcxproj -> E:\Programs\winapiCursach\Debug\winapiCursach.pdb (Full PDB)

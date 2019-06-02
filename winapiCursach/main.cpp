@@ -6,6 +6,7 @@
 #define ID_BUTTON_COLOR 1339
 #define ID_COMBOX 1340
 
+#define ID_SCREENSHOOT_BTN 1341
 
 #include <windows.h> // підключення бібліотеки з функціями API
 #include <string>
@@ -16,7 +17,7 @@
 
 // Глобальні змінні:
 HINSTANCE hInst; 	//Дескриптор програми
-HWND selectChart, pickFileButton, chooseColorButton;
+HWND selectChart, pickFileButton, chooseColorButton, captureScreenShoot;
 LPCTSTR szWindowClass = "CHART";
 LPCTSTR szTitle = "CHART";
 
@@ -72,6 +73,34 @@ COLORREF getRandColor()
 	int b = rand() % maxChanelVal;
 
 	return RGB(r, g, b);
+}
+
+void captureScreen(HWND hWnd)
+{
+	if (!isSetUp) return;
+
+	RECT rt;
+
+	GetWindowRect(hWnd, &rt);
+
+	POINT a, b;
+	a.x = rt.left;
+	a.y = rt.top;
+
+	b.x = rt.right;
+	b.y = rt.bottom;
+
+	// copy screen to bitmap
+	HDC     hScreen = GetDC(NULL);
+	HDC     hDC = CreateCompatibleDC(hScreen);
+	HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, abs(b.x - a.x), abs(b.y - a.y));
+	HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
+	BOOL    bRet = BitBlt(hDC, 0, 0, abs(b.x - a.x), abs(b.y - a.y), hScreen, a.x, a.y, SRCCOPY);
+
+	OpenClipboard(NULL);
+	EmptyClipboard();
+	SetClipboardData(CF_BITMAP, hBitmap);
+	CloseClipboard();
 }
 
 RECT setMainSize(HWND hWnd, bool set = true)
@@ -461,6 +490,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	setMainSize(hWnd);
 
 	pickFileButton = CreateWindow("button", "Pick File", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10, 10, buttonWidth, buttonHeight, hWnd, (HMENU)ID_PICK_FILE_BUTTON, NULL, NULL);
+	captureScreenShoot = CreateWindow("button", "Screenshoot", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10 + buttonWidth + 10, 10, buttonWidth + 15, buttonHeight, hWnd, (HMENU)ID_SCREENSHOOT_BTN, NULL, NULL);
 	selectChart = CreateWindow("combobox", "PickColor", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE, mainWidth - 150, mainHeight - 230, buttonWidth + 70, buttonHeight + 200, hWnd, (HMENU)ID_COMBOX, NULL, NULL);
 	chooseColorButton = CreateWindow("button", "PickColorButton", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, mainWidth - 150, mainHeight - 50, buttonWidth + 70, buttonHeight + 20, hWnd, (HMENU)ID_BUTTON_COLOR, NULL, NULL);
 	
@@ -516,8 +546,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
+		case ID_SCREENSHOOT_BTN:
+			captureScreen(hWnd);
+			break;
 		case ID_PICK_FILE_BUTTON:
-			//MessageBox(hWnd, "Pick File", "File", MB_OK);
 			pickFile(hWnd);
 			break;
 		case ID_BUTTON_COLOR:
