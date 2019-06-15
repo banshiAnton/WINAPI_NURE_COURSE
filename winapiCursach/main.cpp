@@ -64,6 +64,7 @@ void pickFile(HWND);
 void readFile(char*, HWND);
 void setUp(std::string line);
 void draw(HWND, HDC);
+void _deleteUI(HWND, bool);
 
 COLORREF getRandColor()
 {
@@ -139,6 +140,8 @@ void pickFile(HWND hWnd)
 		MessageBox(hWnd, error.c_str(), "Error", MB_OK);
 	}
 
+	SUM = 0;
+	_deleteUI(hWnd, true);
 	readFile(file.lpstrFile, hWnd);
 }
 
@@ -173,12 +176,25 @@ void readFile(char* filePath, HWND hWnd)
 	}
 }
 
-void setUpUI(HWND hWnd)
+void _deleteUI(HWND hWnd, bool reCreate = false)
 {
 	if (!isSetUp) return;
 
 	DestroyWindow(chooseColorButton);
 	DestroyWindow(selectChart);
+
+	if (reCreate) 
+	{
+		selectChart = CreateWindow("combobox", "PickColor", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE, mainWidth - 150, mainHeight - 230, buttonWidth + 70, buttonHeight + 200, hWnd, (HMENU)ID_COMBOX, NULL, NULL);
+		chooseColorButton = CreateWindow("button", "PickColorButton", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, mainWidth - 150, mainHeight - 50, buttonWidth + 70, buttonHeight + 20, hWnd, (HMENU)ID_BUTTON_COLOR, NULL, NULL);
+	}
+}
+
+void setUpUI(HWND hWnd)
+{
+	if (!isSetUp) return;
+
+	_deleteUI(hWnd);
 
 	selectChart = CreateWindow("combobox", "PickColor", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE, mainWidth - 150, mainHeight - 230, buttonWidth + 70, buttonHeight + 200, hWnd, (HMENU)ID_COMBOX, NULL, NULL);
 	chooseColorButton = CreateWindow("button", "PickColorButton", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, mainWidth - 150, mainHeight - 50, buttonWidth + 70, buttonHeight + 20, hWnd, (HMENU)ID_BUTTON_COLOR, NULL, NULL);
@@ -269,8 +285,8 @@ void draw(HWND hWnd, HDC hdc)
 		char label[5];
 		TextOut(hdc, leftGap - 6, startTop + 10, label, wsprintf(label, "%d", labelValue));
 
-		OutputDebugString((LPCSTR)label);
-		OutputDebugString((LPCSTR)"\n");
+		//OutputDebugString((LPCSTR)label);
+		//OutputDebugString((LPCSTR)"\n");
 
 		labelValue += valStep;
 		leftGap += gridGap;
@@ -381,6 +397,9 @@ void draw(HWND hWnd, HDC hdc)
 
 	int nX = paddingLeft + dwRadius;
 	int nY = startTop + dwRadius;
+
+	//OutputDebugString(std::to_string(SUM).c_str());
+	//OutputDebugString((LPCSTR)"\n");
 
 	int xStartAngle = 0;
 
