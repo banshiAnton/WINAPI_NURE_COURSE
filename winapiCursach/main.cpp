@@ -229,10 +229,6 @@ void setUp(std::string line)
 	item.color = getRandColor();
 
 	chart.push_back( item );
-
-	//std::string res = line.substr(0, pos) + line.substr(pos + 1, line.size()) + std::to_string(minValue);
-
-	//SetWindowText(hEdit, res.c_str());
 }
 
 void draw(HWND hWnd, HDC hdc)
@@ -284,9 +280,6 @@ void draw(HWND hWnd, HDC hdc)
 
 		char label[5];
 		TextOut(hdc, leftGap - 6, startTop + 10, label, wsprintf(label, "%d", labelValue));
-
-		//OutputDebugString((LPCSTR)label);
-		//OutputDebugString((LPCSTR)"\n");
 
 		labelValue += valStep;
 		leftGap += gridGap;
@@ -391,15 +384,10 @@ void draw(HWND hWnd, HDC hdc)
 
 	startTop += colMaxHeight - 20;
 
-	Ellipse(hdc, paddingLeft, startTop, paddingLeft + ellipseD, startTop + ellipseD);
-
 	int dwRadius = ellipseD / 2;
 
 	int nX = paddingLeft + dwRadius;
 	int nY = startTop + dwRadius;
-
-	//OutputDebugString(std::to_string(SUM).c_str());
-	//OutputDebugString((LPCSTR)"\n");
 
 	int xStartAngle = 0;
 
@@ -512,8 +500,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	captureScreenShoot = CreateWindow("button", "Screenshoot", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 10 + buttonWidth + 10, 10, buttonWidth + 15, buttonHeight, hWnd, (HMENU)ID_SCREENSHOOT_BTN, NULL, NULL);
 	selectChart = CreateWindow("combobox", "PickColor", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE, mainWidth - 150, mainHeight - 230, buttonWidth + 70, buttonHeight + 200, hWnd, (HMENU)ID_COMBOX, NULL, NULL);
 	chooseColorButton = CreateWindow("button", "PickColorButton", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, mainWidth - 150, mainHeight - 50, buttonWidth + 70, buttonHeight + 20, hWnd, (HMENU)ID_BUTTON_COLOR, NULL, NULL);
-	
-	//hEdit = CreateWindow("edit", "", WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_BORDER | ES_AUTOHSCROLL, 10, 50, 400, 300, hWnd, (HMENU)ID_EDIT_BOX, NULL, NULL);
 
 	ShowWindow(hWnd, nCmdShow); 		//Показати вікно
 	UpdateWindow(hWnd); 				//Оновити вікно
@@ -572,13 +558,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			pickFile(hWnd);
 			break;
 		case ID_BUTTON_COLOR:
-
 			currentSec = SendMessage(selectChart, (UINT)CB_GETCURSEL, 0, 0);
-
 			pickColor(hWnd);
-
 			InvalidateRect(hWnd, NULL, FALSE);
-
 			break;
 		default:
 			break;
