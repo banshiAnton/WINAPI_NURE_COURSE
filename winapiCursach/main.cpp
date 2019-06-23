@@ -341,9 +341,7 @@ void draw(HWND hWnd, HDC hdc)
 
 	int startLinesGrid = startTop;
 
-	int COUNTSECTIONS_FOR_SECORD_GRID = COUNTSECTIONS;
-
-	COUNTSECTIONS_FOR_SECORD_GRID -= COUNTSECTIONS / 2;
+	int COUNTSECTIONS_FOR_SECORD_GRID = COUNTSECTIONS / 2;
 
 	SelectObject(hdc, hPenGrid); 
 
